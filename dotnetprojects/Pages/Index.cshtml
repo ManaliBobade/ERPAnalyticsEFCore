@@ -1,0 +1,129 @@
+﻿@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Home page";
+}
+
+<!DOCTYPE html>
+<html>
+  <!DOCTYPE html>
+  <html lang="en">
+  <head>
+	  <meta charset="UTF-8">
+	  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+	  <title>CameraAnalytics</title>
+	  <!-- Include the ECharts file you just downloaded -->
+	  <script src="echarts.js"></script>
+	  <style>
+		  body {
+			  font-family: Arial, sans-serif;
+			  display: flex;
+			  flex-direction: column;
+			  align-items: center;
+			  padding: 20px;
+		  }
+  
+		  .form-container {
+			  display: flex;
+			  align-items: center;
+			  gap: 20px; /* Adds space between elements */
+			  padding: 15px;
+			  border: 1px solid #ddd;
+			  border-radius: 10px;
+			  background-color: #f9f9f9;
+			  width: 670px;
+			  justify-content: space-between;
+		  }
+  
+		  .form-group {
+			  display: flex;
+			  flex-direction: column;
+			  align-items: flex-start;
+		  }
+  
+		  label {
+			  font-weight: bold;
+			  margin-bottom: 5px;
+		  }
+  
+		  input, select {
+			  padding: 5px;
+			  font-size: 14px;
+			  width: 150px;
+		  }
+  
+		  #cameraname {
+			  width: 200px;
+			  height: 60px; /* Adjusted for multiple selection */
+		  }
+  
+		  button {
+			  padding: 8px 15px;
+			  font-size: 14px;
+			  background-color: #007bff;
+			  color: white;
+			  border: none;
+			  border-radius: 5px;
+			  cursor: pointer;
+			  align-self: flex-end;
+		  }
+  
+		  button:hover {
+			  background-color: #0056b3;
+		  }
+  
+		  .results {
+			  margin-top: 15px;
+			  width: 600px;
+			  text-align: left;
+		  }
+	  </style>
+  </head>
+
+	<script type="text/javascript">
+		function showPplCount() {
+            
+		}
+		
+	</script>
+
+<body>
+
+    <div class="form-container">
+        <div class="form-group">
+            <label for="Test_DatetimeLocal">Date:</label>
+            <input type="date" id="Test_DatetimeLocal">
+        </div>
+
+        <div class="form-group">
+            <label for="cameraname">Camera Name:</label>
+            <select name="cameraname" id="cameraname" multiple class="form-control">
+            @foreach (var camera in Model.Cameras) {
+                <option value="@camera.CameraID">@camera.CameraName</option> 
+            }
+        </select>
+        </div>
+
+        <div class="form-group">
+            <label for="mealtype">Schedule:</label>
+            <select name="mealtype" id="mealtype">
+                <option value="breakfast">Breakfast</option>
+                <option value="lunch">Lunch</option>
+                <option value="dinner">Dinner</option>
+            </select>
+        </div>
+        
+        <div id="showbutton" style="display: flex; align-items: center; height: 100%;">
+            <button onclick="showPplCount()" style="padding: 8px 15px; font-size: 14px;">Get Count</button>
+        </div>
+    </div>
+
+    <div class="results">
+        <p><strong>Total In Count:</strong> <span id="countLabel1"></span></p>
+        <p><strong>Total Out Count:</strong> <span id="countLabel2"></span></p>
+		<p><strong></strong> <span id="tempLabel"></span></p>
+    </div>
+
+</body>
+</html>
+
