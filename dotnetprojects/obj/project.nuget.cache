@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "rJYU2TgHsAc=",
+  "dgSpecHash": "gJgmbKGiRnc=",
   "success": true,
-  "projectFilePath": "/Users/manali/Documents/dotnetprojects/dotnetprojects.csproj",
+  "projectFilePath": "/Users/manali/Documents/GitHub/ERPAnalyticsEFCore/dotnetprojects/dotnetprojects.csproj",
   "expectedPackageFiles": [
     "/Users/manali/.nuget/packages/azure.core/1.38.0/azure.core.1.38.0.nupkg.sha512",
     "/Users/manali/.nuget/packages/azure.identity/1.11.4/azure.identity.1.11.4.nupkg.sha512",
