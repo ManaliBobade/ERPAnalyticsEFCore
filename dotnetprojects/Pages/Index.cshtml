@@ -82,9 +82,14 @@
 
 	<script type="text/javascript">
 		function showPplCount() {
-            
+
+		var totalIn = document.getElementById('totalIn').value;
+        var totalOut = document.getElementById('totalOut').value;
+
+        // Update the labels with the respective values
+        document.getElementById('countLabel1').textContent = totalIn;
+        document.getElementById('countLabel2').textContent = totalOut;
 		}
-		
 	</script>
 
 <body>
@@ -124,6 +129,11 @@
 		<p><strong></strong> <span id="tempLabel"></span></p>
     </div>
 
+	<!-- Hidden inputs to store total counts -->
+	<input type="hidden" id="totalIn" value="@Model.TotalIn" />
+	<input type="hidden" id="totalOut" value="@Model.TotalOut" />
+
 </body>
 </html>
+
 
