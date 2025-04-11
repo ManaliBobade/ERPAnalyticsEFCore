@@ -22,13 +22,15 @@ public class CountDataService
     }
 
     public async Task<CountTotals> GetCountTotalsFilteredAsync(
-    List<int> cameraIDs) {
-        Console.WriteLine("Received camera IDs:");
-        foreach (var id in cameraIDs) {
-            Console.WriteLine(id);
-        }
+    List<int> cameraIDs, long fromTime, long toTime) {
+        var fromTimeNew = 1744103930;
+        var toTimeNew = 1744357711;
+
         var totals = await _context.CountData
-        .Where(cd => cameraIDs.Contains(cd.CameraId))
+        .Where(cd =>
+            cameraIDs.Contains(cd.CameraId) &&
+            cd.StartTime >= fromTimeNew &&
+            cd.EndTime <= toTimeNew)
         .GroupBy(_ => 1)
         .Select(g => new CountTotals
         {

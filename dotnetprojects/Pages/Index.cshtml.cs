@@ -19,11 +19,13 @@ public class IndexModel(CameraService cameraService, CountDataService countDataS
         Cameras = _cameraService.GetCameras();
     }
 
-    public async Task<JsonResult> OnGetGetPeopleCountAsync([FromQuery] List<int> cameraIds) {
+    public async Task<JsonResult> OnGetGetPeopleCountAsync([FromQuery] List<int> cameraIds,
+        [FromQuery] long from,
+        [FromQuery] long to) {
 
-        var fromTime = new DateTime(2025, 4, 7, 0, 0, 0);
-        var toTime = new DateTime(2025, 4, 12, 23, 59, 59);
-        (int totalIn, int totalOut) = await _countDataService.GetCountTotalsFilteredAsync(cameraIds);
+        Console.WriteLine($"Timestamps: {from} {to}");
+
+        (int totalIn, int totalOut) = await _countDataService.GetCountTotalsFilteredAsync(cameraIds, from, to);
         TotalIn = totalIn;
         TotalOut = totalOut;
         return new JsonResult(new {
