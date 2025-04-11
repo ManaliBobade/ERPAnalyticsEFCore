@@ -81,15 +81,22 @@
   </head>
 
 	<script type="text/javascript">
-		function showPplCount() {
+	function showPplCount() {
 
-		var totalIn = document.getElementById('totalIn').value;
-        var totalOut = document.getElementById('totalOut').value;
+		const selectedOptions = Array.from(document.getElementById("cameraname").selectedOptions);
+        const selectedIds = selectedOptions.map(opt => opt.value);
+        const queryString = selectedIds.map(id => `cameraIds=${encodeURIComponent(id)}`).join('&');
 
-        // Update the labels with the respective values
-        document.getElementById('countLabel1').textContent = totalIn;
-        document.getElementById('countLabel2').textContent = totalOut;
-		}
+		fetch(`/Index?handler=GetPeopleCount&${queryString}`)
+		.then(response => response.json())
+		.then(data => {
+			document.getElementById('countLabel1').textContent = data.totalIn;
+        	document.getElementById('countLabel2').textContent = data.totalOut;
+		})
+		.catch(error => {
+			console.error("Error fetching people count:", error);
+		});
+	}
 	</script>
 
 <body>
