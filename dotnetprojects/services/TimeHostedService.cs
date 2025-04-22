@@ -16,7 +16,7 @@ public class TimedHostedService : IHostedService
     }
 
     public Task StartAsync(CancellationToken cancellationToken) {
-        _timer = new Timer(HandleTimerElapsed, null, 0, 60000); //60 sec
+        _timer = new Timer(HandleTimerElapsed, null, 0, 5000); //60 sec
         return Task.CompletedTask;
     }
 
@@ -33,29 +33,50 @@ public class TimedHostedService : IHostedService
             foreach (var camera in cameras) {
                 _logger.LogInformation($"CameraID: {camera.CameraID}, CameraName: {camera.CameraName}");
             }
-            var allCameras = new List<object>();
+
+            var allCamerasAPI = new List<Object>();
+            var allCamerasDB = new List<Camera>();
 
             foreach(Camera camera in cameras) {
-                var newcamera = new {
+                long lastRefreshTime = new DateTimeOffset(camera.LastRefreshTimestamp.ToUniversalTime()).ToUnixTimeSeconds();
+                long refreshRateSecs = camera.RefreshRateInSeconds;
+                long nextRefreshTime = lastRefreshTime + refreshRateSecs;
+                long currentTimeSecs = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+
+                Console.WriteLine($"lastRefreshTime: {lastRefreshTime} cameraId: {camera.CameraID} currentTime: {currentTimeSecs} refreshRateSecs: {refreshRateSecs}");
+
+                if (currentTimeSecs < nextRefreshTime) {
+                    //This camera does not need count right now ... skip
+                    continue;
+                }
+                var newcamera = new  {
                     camera_name = camera.CameraName,  
-                    camera_id = camera.CameraID,               // Dynamically changing the camera ID
-                    start_time = ((DateTimeOffset.UtcNow.ToUnixTimeSeconds() - 60)),
+                    camera_id = camera.CameraID,               
+                    start_time = ((DateTimeOffset.UtcNow.ToUnixTimeSeconds() - refreshRateSecs)),
                     end_time = DateTimeOffset.UtcNow.ToUnixTimeSeconds()
                 };
-                allCameras.Add(newcamera); // Add the camera object to the list
+                allCamerasAPI.Add(newcamera); // Add the camera object to the list
+                allCamerasDB.Add(camera);
+            }
+
+            if (allCamerasAPI.Count == 0) {
+                //List empty. Need not fire API ... return 
+                return;
             }
             // Serialize the list of cameras into a JSON string
             var values = new Dictionary<string, string> {
-                { "request_data", JsonConvert.SerializeObject(allCameras) }
+                { "request_data", JsonConvert.SerializeObject(allCamerasAPI) }
             };
-            Console.WriteLine($"API body: {JsonConvert.SerializeObject(allCameras)}");
+            Console.WriteLine($"API body: {JsonConvert.SerializeObject(allCamerasAPI)}");
             var content = new FormUrlEncodedContent(values);
             //TODO: handle exceptions here .... app should not crash for no n/w
             var response = await _httpClient.PostAsync("http://164.52.206.39:5100/multi-camera-occupancy-data-within-time-range", content);
             if (response.IsSuccessStatusCode){
                 var jsonString = await response.Content.ReadAsStringAsync();
+                Console.WriteLine($"API response: {jsonString}");
                 //TODO: Add await 
                 SaveCountDataFromApiResponse(jsonString);
+                UpdateLastFetchedTimestamps(allCamerasDB);
             }else {
                 var errorText = await response.Content.ReadAsStringAsync();
                 Console.WriteLine($"API Error: {response.StatusCode} - {errorText}");
@@ -73,6 +94,25 @@ public class TimedHostedService : IHostedService
                     await countDataService.SaveCountDataAsync(jsonObject.Data);
                     Console.WriteLine("Count data has been saved.");
                 }
+            }catch (Exception ex) {
+                // Catch and print any exception that occurs
+                Console.WriteLine($"An error occurred: {ex.Message}");
+                Console.WriteLine($"Stack Trace: {ex.StackTrace}");
+            }
+        }
+    }
+    public async Task UpdateLastFetchedTimestamps(List<Camera> cameras) {
+        long unixTimestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+        DateTime localTime = DateTimeOffset.FromUnixTimeSeconds(unixTimestamp).ToLocalTime().DateTime;
+        foreach(Camera camera in cameras) {
+            camera.LastRefreshTimestamp = localTime;
+        }
+
+        using (var scope = _scopeFactory.CreateScope()) {
+            var cameraService = scope.ServiceProvider.GetRequiredService<CameraService>();
+            try {
+                await cameraService.SaveOrUpdateCameras(cameras);
+                Console.WriteLine("LastRefreshTimestamps updated");
             }catch (Exception ex) {
                 // Catch and print any exception that occurs
                 Console.WriteLine($"An error occurred: {ex.Message}");
