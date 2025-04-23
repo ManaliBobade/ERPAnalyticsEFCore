@@ -3,10 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.AspNetCore.Mvc;
 
-public class IndexModel(CameraService cameraService, CountDataService countDataService) : PageModel
+public class IndexModel(CameraService cameraService, CountDataService countDataService, ScheduleService scheduleService) : PageModel
 {
     private readonly CameraService _cameraService = cameraService;
     private readonly CountDataService _countDataService = countDataService;
+    private readonly ScheduleService _scheduleService = scheduleService;
 
     // Properties to hold data for the view
     public required List<Camera> Cameras { get; set; }
@@ -17,6 +18,12 @@ public class IndexModel(CameraService cameraService, CountDataService countDataS
     public async Task OnGetAsync() {
         // Synchronous call for camera list (if you need to populate it for UI)
         Cameras = _cameraService.GetCameras();
+    }
+
+    public async Task<JsonResult> OnGetGetSchedulesAsync([FromQuery] int cameraId) {
+        // Ideally, make your GetSchedules method async if DB supports it
+        var schedules = _scheduleService.GetSchedules(cameraId);
+        return new JsonResult(schedules);
     }
 
     public async Task<JsonResult> OnGetGetPeopleCountAsync([FromQuery] List<int> cameraIds,

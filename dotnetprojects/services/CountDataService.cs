@@ -38,7 +38,6 @@ public class CountDataService
             TotalOut = g.Sum(cd => cd.Out)
         })
         .FirstOrDefaultAsync();
-        Console.WriteLine($"Totals: {totals.TotalOut} {totals.TotalIn}");
         return totals ?? new CountTotals(); // Return 0s if no match
     }
     
