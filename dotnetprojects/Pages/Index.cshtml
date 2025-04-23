@@ -81,10 +81,47 @@
   </head>
 
 	<script type="text/javascript">
-		function showPplCount() {
-            
+	function showPplCount() {
+
+		const selectedOptions = Array.from(document.getElementById("cameraname").selectedOptions);
+        const selectedIds = selectedOptions.map(opt => opt.value);
+
+		var schedule = document.getElementById('mealtype');
+		var selectedSchedule = schedule.value;
+		var inputDateString = document.getElementById('Test_DatetimeLocal').value;
+		var selectedDate1 = new Date(inputDateString);
+		var selectedDate2 = new Date(inputDateString);
+
+		if (selectedSchedule == "breakfast") {
+			selectedDate1.setHours(8, 0, 0, 0);
+			selectedDate2.setHours(9, 30, 0, 0);
 		}
-		
+		if (selectedSchedule == "lunch") {
+			selectedDate1.setHours(12, 30, 0, 0);
+			selectedDate2.setHours(14, 0, 0, 0);
+		}
+		if (selectedSchedule == "dinner") {
+			selectedDate1.setHours(20, 0, 0, 0);
+			selectedDate2.setHours(21, 30, 0, 0);
+		}
+
+		var t1 = Math.round(selectedDate1.getTime() / 1000);
+		var t2 = Math.round(selectedDate2.getTime() / 1000);  
+
+		const cameraParams = selectedIds.map(id => `cameraIds=${encodeURIComponent(id)}`).join('&');
+		const timeParams = `from=${t1}&to=${t2}`;
+		const queryString = `${cameraParams}&${timeParams}`;
+
+		fetch(`/Index?handler=GetPeopleCount&${queryString}`)
+		.then(response => response.json())
+		.then(data => {
+			document.getElementById('countLabel1').textContent = data.totalIn;
+        	document.getElementById('countLabel2').textContent = data.totalOut;
+		})
+		.catch(error => {
+			console.error("Error fetching people count:", error);
+		});
+	}
 	</script>
 
 <body>
@@ -124,6 +161,11 @@
 		<p><strong></strong> <span id="tempLabel"></span></p>
     </div>
 
+	<!-- Hidden inputs to store total counts -->
+	<input type="hidden" id="totalIn" value="@Model.TotalIn" />
+	<input type="hidden" id="totalOut" value="@Model.TotalOut" />
+
 </body>
 </html>
+
 

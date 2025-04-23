@@ -4767,11 +4767,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "/Users/manali/Documents/dotnetprojects/dotnetprojects.csproj",
+      "projectUniqueName": "/Users/manali/Documents/GitHub/ERPAnalyticsEFCore/dotnetprojects/dotnetprojects.csproj",
       "projectName": "dotnetprojects",
-      "projectPath": "/Users/manali/Documents/dotnetprojects/dotnetprojects.csproj",
+      "projectPath": "/Users/manali/Documents/GitHub/ERPAnalyticsEFCore/dotnetprojects/dotnetprojects.csproj",
       "packagesPath": "/Users/manali/.nuget/packages/",
-      "outputPath": "/Users/manali/Documents/dotnetprojects/obj/",
+      "outputPath": "/Users/manali/Documents/GitHub/ERPAnalyticsEFCore/dotnetprojects/obj/",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "/Users/manali/.nuget/NuGet/NuGet.Config"

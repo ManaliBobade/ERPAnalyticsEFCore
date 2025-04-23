@@ -10,4 +10,9 @@ public class Camera {
 
     // Property for Camera ID
     public int CameraID { get; set; }
+
+    public int RefreshRateInSeconds { get; set; }
+
+    // Property for Last Refresh Timestamp
+    public DateTime LastRefreshTimestamp { get; set; }
 }
