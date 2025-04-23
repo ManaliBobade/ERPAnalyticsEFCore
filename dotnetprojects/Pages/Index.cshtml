@@ -124,6 +124,45 @@
 	}
 	</script>
 
+	<script>
+		document.getElementById('cameraname').addEventListener('change', function () {
+
+
+			const tempLabel = document.getElementById('tempLabel');
+			if (selectedCameraIDs.length > 0) {
+			tempLabel.textContent = "Selected Camera ID: " + selectedCameraIDs[0];
+			} else {
+				tempLabel.textContent = "";
+			}
+
+			const selectedOptions = Array.from(this.selectedOptions);
+			const selectedCameraIDs = selectedOptions.map(option => option.value);
+			console.log("Selected Camera IDs:", selectedCameraIDs);
+			if (selectedCameraIDs.length > 0) {
+				const cameraID = selectedCameraIDs[0]; // Take the first selected camera ID
+				fetch(`/api/schedules/${cameraID}`)
+					.then(response => {
+						if (!response.ok) throw new Error("Network response was not ok");
+						return response.json();
+					})
+					.then(data => {
+						console.log("Schedules:", data);
+						const mealTypeSelect = document.getElementById('mealtype');
+						mealTypeSelect.innerHTML = "";
+						data.forEach(schedule => {
+							const option = document.createElement('option');
+							option.value = schedule.ScheduleID; // Adjust key as per your model
+							option.textContent = schedule.ScheduleName;
+							mealTypeSelect.appendChild(option);
+						});
+					})
+					.catch(error => {
+						console.error("Error fetching schedules:", error);
+					});
+			}
+		});
+	</script>
+
 <body>
 
     <div class="form-container">
@@ -141,14 +180,12 @@
         </select>
         </div>
 
-        <div class="form-group">
-            <label for="mealtype">Schedule:</label>
-            <select name="mealtype" id="mealtype">
-                <option value="breakfast">Breakfast</option>
-                <option value="lunch">Lunch</option>
-                <option value="dinner">Dinner</option>
-            </select>
-        </div>
+       <div class="form-group">
+   		 <label for="mealtype">Schedule:</label>
+   			<select name="mealtype" id="mealtype" class="form-control">
+        		<option value="">-- Select a schedule --</option> <!-- Optional placeholder -->
+    		</select>
+		</div>
         
         <div id="showbutton" style="display: flex; align-items: center; height: 100%;">
             <button onclick="showPplCount()" style="padding: 8px 15px; font-size: 14px;">Get Count</button>

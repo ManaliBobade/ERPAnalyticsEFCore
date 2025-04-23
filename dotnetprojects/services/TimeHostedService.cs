@@ -16,7 +16,7 @@ public class TimedHostedService : IHostedService
     }
 
     public Task StartAsync(CancellationToken cancellationToken) {
-        _timer = new Timer(HandleTimerElapsed, null, 0, 5000); //60 sec
+        _timer = new Timer(HandleTimerElapsed, null, 0, 120000); //120 sec
         return Task.CompletedTask;
     }
 

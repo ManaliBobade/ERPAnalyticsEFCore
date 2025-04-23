@@ -15,4 +15,7 @@ public class Camera {
 
     // Property for Last Refresh Timestamp
     public DateTime LastRefreshTimestamp { get; set; }
+
+    public string? CameraAPIURL { get; set; }
+
 }
