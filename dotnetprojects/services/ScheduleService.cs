@@ -15,4 +15,11 @@ public class ScheduleService
             .Where(s => s.CameraID == cameraID)
             .ToList();
     }
+
+    public List<Schedule> GetScheduleByID(int scheduleID)
+    {
+        return _dbContext.Schedules
+            .Where(s => s.ScheduleID == scheduleID)
+            .ToList();
+    }
 }

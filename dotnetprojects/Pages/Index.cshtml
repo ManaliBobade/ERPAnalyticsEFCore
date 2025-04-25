@@ -87,12 +87,33 @@
 
 	<script type="text/javascript">
 	function showPplCount() {
+		var schedule = document.getElementById('mealtype');
+		var selectedScheduleID = schedule.value;
+
+		fetch(`/Index?handler=GetScheduleByID&scheduleID=${selectedScheduleID}`)
+		.then(response => {
+    		if (!response.ok) {
+      			throw new Error(`Server returned ${response.status}: ${response.statusText}`);
+   			 }
+    		return response.json();
+  		})
+		.then(data => {
+			if (Array.isArray(data) && data.length > 0) {
+				data.forEach(schedule => {
+				selectedScheduleID = schedule.scheduleName;
+				});
+				showPplCount1(selectedScheduleID);
+			} 
+		})
+		.catch(error => {
+			console.error('Fetch error:', error);
+		});
+	}
+
+	function showPplCount1(selectedSchedule) {
 
 		const selectedOptions = Array.from(document.getElementById("cameraname").selectedOptions);
         const selectedIds = selectedOptions.map(opt => opt.value);
-
-		var schedule = document.getElementById('mealtype');
-		var selectedSchedule = schedule.value;
 		var inputDateString = document.getElementById('Test_DatetimeLocal').value;
 		var selectedDate1 = new Date(inputDateString);
 		var selectedDate2 = new Date(inputDateString);
@@ -184,7 +205,7 @@
             mealTypeSelect.innerHTML = ''; 
 			data.forEach(schedule => {
                 const option = document.createElement('option');
-                option.value = schedule.ScheduleID; 
+                option.value = schedule.scheduleID; 
                 option.textContent = schedule.scheduleName;
                 mealTypeSelect.appendChild(option);
             });

@@ -26,11 +26,15 @@ public class IndexModel(CameraService cameraService, CountDataService countDataS
         return new JsonResult(schedules);
     }
 
+    public async Task<JsonResult> OnGetGetScheduleByIDAsync([FromQuery] int scheduleID) {
+        // Ideally, make your GetSchedules method async if DB supports it
+        var schedule = _scheduleService.GetScheduleByID(scheduleID);
+        return new JsonResult(schedule);
+    }
+
     public async Task<JsonResult> OnGetGetPeopleCountAsync([FromQuery] List<int> cameraIds,
         [FromQuery] long from,
         [FromQuery] long to) {
-
-        Console.WriteLine($"Timestamps: {from} {to}");
 
         (int totalIn, int totalOut) = await _countDataService.GetCountTotalsFilteredAsync(cameraIds, from, to);
         TotalIn = totalIn;
