@@ -44,5 +44,17 @@ public class IndexModel(CameraService cameraService, CountDataService countDataS
             totalOut
         });
     }
+    public IActionResult OnPostAddSchedue([FromBody] Schedule schedule)
+    {
+        try{
+            _scheduleService.AddSchedule(schedule);
+            // Example return: returning CameraID as "count"
+            return new JsonResult(new { count = schedule.ScheduleName });
+        }
+        catch (Exception ex) {
+            // Log the exception if needed
+            return StatusCode(500, "Internal server error: " + ex.Message);
+        }
+    }
 
 }

@@ -4,6 +4,11 @@
     ViewData["Title"] = "Home page";
 }
 
+<!-- Hidden form to generate the anti-forgery token -->
+<form method="post">
+    @Html.AntiForgeryToken()
+</form>
+
 <!DOCTYPE html>
 <html>
   <!DOCTYPE html>
@@ -149,11 +154,35 @@
 		.catch(error => {
 			console.error("Error fetching people count:", error);
 		});
-	
+
 	});
 </script>
 
 <script type="text/javascript">
+
+	function addSchedue() {
+		const scheduleData = {
+			cameraID: 5,
+			scheduleName: "Morning Shift1234",
+			startTime: new Date().toISOString(), // ISO 8601 format is important
+			durationInSec: 3600
+		};
+
+		fetch('?handler=AddSchedue', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+				'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+			},
+			body: JSON.stringify(scheduleData)
+		})
+		.then(response => response.json())
+		.then(data => {
+			alert("People Count: " + data.count);
+		})
+		.catch(error => console.error('Error:', error));
+	}
+
 	function showPplCount() {
 		var schedule = document.getElementById('mealtype');
 		var selectedScheduleID = schedule.value;

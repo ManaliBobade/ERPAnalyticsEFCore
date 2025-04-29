@@ -22,4 +22,10 @@ public class ScheduleService
             .Where(s => s.ScheduleID == scheduleID)
             .ToList();
     }
+
+    public void AddSchedule(Schedule newSchedule)
+    {
+        _dbContext.Schedules.Add(newSchedule);
+        _dbContext.SaveChanges();
+    }
 }
