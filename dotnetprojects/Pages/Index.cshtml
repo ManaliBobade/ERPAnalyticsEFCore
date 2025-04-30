@@ -90,7 +90,6 @@
     	var camerasJson = JsonSerializer.Serialize(Model.Cameras);
 	}
 
-
 <body>
 
     <div class="form-container">
@@ -102,20 +101,20 @@
         <div class="form-group">
             <label for="cameraname">Camera Name:</label>
             <select name="cameraname" id="cameraname" multiple class="form-control">
-            @foreach (var camera in Model.Cameras) {
-                <option value="@camera.CameraID">@camera.CameraName</option> 
-            }
-        	</select>
+                @foreach (var camera in Model.Cameras) {
+                    <option value="@camera.CameraID">@camera.CameraName</option> 
+                }
+            </select>
         </div>
 
-       <div class="form-group">
-   		 <label for="mealtype">Schedule:</label>
-   			<select name="mealtype" id="mealtype" class="form-control">
-        		<option value="">-- Select a schedule --</option> <!-- Optional placeholder -->
-    		</select>
-		</div>
+        <div class="form-group">
+            <label for="mealtype">Schedule:</label>
+            <select name="mealtype" id="mealtype" class="form-control">
+                <option value="">-- Select a schedule --</option> <!-- Optional placeholder -->
+            </select>
+        </div>
         
-        <div id="showbutton" style="display: flex; align-items: center; height: 100%;">
+        <div id="showbutton" style="display: flex; align-items: center; height: 100%; margin-bottom: 15px;">
             <button onclick="showPplCount()" style="padding: 8px 15px; font-size: 14px;">Get Count</button>
         </div>
     </div>
@@ -123,12 +122,28 @@
     <div class="results">
         <p><strong>Total In Count:</strong> <span id="countLabel1"></span></p>
         <p><strong>Total Out Count:</strong> <span id="countLabel2"></span></p>
-		<p><strong></strong> <span id="tempLabel"></span></p>
+        <p><strong></strong> <span id="tempLabel"></span></p>
+
+        <!-- New Schedule Rectangle placed below Total Out Count -->
+        <div class="form-group" style="border: 1px solid #ccc; padding: 15px; border-radius: 5px; margin-top: 20px; width: 50%;">
+            <label for="scheduleName">Schedule Name:</label>
+            <input type="text" id="scheduleName" placeholder="Enter schedule name" class="form-control" />
+
+            <label for="duration">Duration (seconds):</label>
+            <input type="number" id="duration" min="1" placeholder="Duration in seconds" class="form-control" oninput="validateDuration(event)" />
+
+            <label for="startTime">Start Time (24hr format):</label>
+            <input type="time" id="startTime" class="form-control" step="1" /> <!-- Input for time -->
+
+            <div style="margin-top: 10px;">
+                <button onclick="addSchedule()" style="padding: 8px 15px; font-size: 14px;">Add Schedule</button>
+            </div>
+        </div>
     </div>
 
-	<!-- Hidden inputs to store total counts -->
-	<input type="hidden" id="totalIn" value="@Model.TotalIn" />
-	<input type="hidden" id="totalOut" value="@Model.TotalOut" />
+    <!-- Hidden inputs to store total counts -->
+    <input type="hidden" id="totalIn" value="@Model.TotalIn" />
+    <input type="hidden" id="totalOut" value="@Model.TotalOut" />
 
 </body>
 </html>
@@ -160,12 +175,40 @@
 
 <script type="text/javascript">
 
-	function addSchedue() {
+	function addSchedule() {
+
+		var scheduleName = document.getElementById('scheduleName').value;
+    	var timeValue = document.getElementById('startTime').value;
+        var duration = parseInt(document.getElementById('duration').value, 10); // Convert duration to integer
+
+        if (!scheduleName || !startTime || isNaN(duration)) {
+            alert('Please fill in all fields with valid values!');
+            return; // Stop the function if any field is empty or duration is not a number
+        }
+
+		// Split time into components
+    	var [hours, minutes, seconds] = timeValue.split(':');
+    	seconds = seconds || '00';
+
+		var today = new Date();
+		var localTime = new Date(
+			today.getFullYear(),
+			today.getMonth(),
+			today.getDate(),
+			parseInt(hours),
+			parseInt(minutes),
+			parseInt(seconds)
+		);
+
+		const pad = (n) => n.toString().padStart(2, '0');
+    	var formattedLocalDate = `${localTime.getFullYear()}-${pad(localTime.getMonth() + 1)}-${pad(localTime.getDate())}T${pad(localTime.getHours())}:${pad(localTime.getMinutes())}:${pad(localTime.getSeconds())}`;
+
 		const scheduleData = {
 			cameraID: 5,
-			scheduleName: "Morning Shift1234",
-			startTime: new Date().toISOString(), // ISO 8601 format is important
-			durationInSec: 3600
+			scheduleName: scheduleName,
+			@* startTime: new Date().toISOString(), // ISO 8601 format is important *@
+			startTime: formattedLocalDate,
+			durationInSec: duration
 		};
 
 		fetch('?handler=AddSchedue', {
@@ -178,7 +221,7 @@
 		})
 		.then(response => response.json())
 		.then(data => {
-			alert("People Count: " + data.count);
+			alert("Added Schedule: " + data.count);
 		})
 		.catch(error => console.error('Error:', error));
 	}
