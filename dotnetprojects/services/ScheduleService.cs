@@ -23,9 +23,10 @@ public class ScheduleService
             .ToList();
     }
 
-    public void AddSchedule(Schedule newSchedule)
+    public async Task AddScheduleAsync(Schedule newSchedule)
     {
         _dbContext.Schedules.Add(newSchedule);
-        _dbContext.SaveChanges();
+        await _dbContext.SaveChangesAsync();
     }
+
 }

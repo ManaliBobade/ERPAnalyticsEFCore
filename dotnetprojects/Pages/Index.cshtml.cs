@@ -44,10 +44,10 @@ public class IndexModel(CameraService cameraService, CountDataService countDataS
             totalOut
         });
     }
-    public IActionResult OnPostAddSchedue([FromBody] Schedule schedule)
+    public async Task<IActionResult> OnPostAddSchedue([FromBody] Schedule schedule)
     {
         try{
-            _scheduleService.AddSchedule(schedule);
+            await _scheduleService.AddScheduleAsync(schedule);
             // Example return: returning CameraID as "count"
             return new JsonResult(new { count = schedule.ScheduleName });
         }
