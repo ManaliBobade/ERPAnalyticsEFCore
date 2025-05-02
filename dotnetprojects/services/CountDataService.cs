@@ -16,7 +16,10 @@ public class CountDataService
 
     public async Task SaveCountDataAsync(IEnumerable<CountData> countDataList)
     {
-        // Assuming you have a CountData table in your DB context
+        foreach (var item in countDataList) {
+            item.DateOnly = item.Date;
+            item.TimeOnly = item.Time;
+        }
         await _context.CountData.AddRangeAsync(countDataList);
         await _context.SaveChangesAsync();
     }

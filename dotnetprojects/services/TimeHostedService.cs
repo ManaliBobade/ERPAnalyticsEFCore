@@ -16,7 +16,7 @@ public class TimedHostedService : IHostedService
     }
 
     public Task StartAsync(CancellationToken cancellationToken) {
-        _timer = new Timer(HandleTimerElapsed, null, 0, 120000); //120 sec
+        _timer = new Timer(HandleTimerElapsed, null, 0, 1000); //1 sec
         return Task.CompletedTask;
     }
 
@@ -59,6 +59,7 @@ public class TimedHostedService : IHostedService
                 allCamerasDB.Add(camera);
             }
 
+
             if (allCamerasAPI.Count == 0) {
                 //List empty. Need not fire API ... return 
                 return;
@@ -70,7 +71,7 @@ public class TimedHostedService : IHostedService
             Console.WriteLine($"API body: {JsonConvert.SerializeObject(allCamerasAPI)}");
             var content = new FormUrlEncodedContent(values);
             //TODO: handle exceptions here .... app should not crash for no n/w
-            var response = await _httpClient.PostAsync("http://164.52.206.39:5100/multi-camera-occupancy-data-within-time-range", content);
+            var response = await _httpClient.PostAsync("http://164.52.206.39:5100/multi-camera-occupancy-data-within-time-range-random", content);
             if (response.IsSuccessStatusCode){
                 var jsonString = await response.Content.ReadAsStringAsync();
                 Console.WriteLine($"API response: {jsonString}");

@@ -24,9 +24,20 @@ public class CountData
     [JsonProperty("out")] 
     public int Out { get; set; }
 
-    [JsonProperty("start_time")] 
+    [JsonProperty("start_time")]
     public long StartTime { get; set; }
-    
-    [JsonProperty("end_time")] 
+
+    [JsonIgnore]
+    public DateTime Date => DateTimeOffset.FromUnixTimeSeconds(StartTime).Date;
+
+    [JsonIgnore]
+    public TimeSpan Time => DateTimeOffset.FromUnixTimeSeconds(StartTime).TimeOfDay;
+
+    // If you still want to deserialize end_time but ignore it for DB:
+    [JsonProperty("end_time")]
     public long EndTime { get; set; }
+    
+    // These will be persisted in the DB:
+    public DateTime DateOnly { get; set; }
+    public TimeSpan TimeOnly { get; set; }
 }
