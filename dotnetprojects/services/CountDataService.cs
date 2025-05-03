@@ -27,7 +27,7 @@ public class CountDataService
     public async Task<CountTotals> GetCountTotalsFilteredAsync(
     List<int> cameraIDs, long fromTime, long toTime) {
 
-        Console.WriteLine($"Timestamps: {fromTime} {toTime} CameraIds: {string.Join(", ", cameraIDs)}");
+        Console.WriteLine($"GetCount Timestamps: {fromTime} {toTime} CameraIds: {string.Join(", ", cameraIDs)}");
     
         var totals = await _context.CountData
         .Where(cd =>

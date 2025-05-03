@@ -27,6 +27,7 @@ public class TimedHostedService : IHostedService
 
     private async void HandleTimerElapsed(object state) {
         Console.WriteLine("HandleTimerElapsed : " + DateTime.Now);
+        long currentTimeSecs = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
         using (var scope = _scopeFactory.CreateScope()) {
             var cameraService = scope.ServiceProvider.GetRequiredService<CameraService>();
             var cameras = cameraService.GetCameras();  // Get camera data
@@ -41,7 +42,7 @@ public class TimedHostedService : IHostedService
                 long lastRefreshTime = new DateTimeOffset(camera.LastRefreshTimestamp.ToUniversalTime()).ToUnixTimeSeconds();
                 long refreshRateSecs = camera.RefreshRateInSeconds;
                 long nextRefreshTime = lastRefreshTime + refreshRateSecs;
-                long currentTimeSecs = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+                // long currentTimeSecs = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
 
                 Console.WriteLine($"lastRefreshTime: {lastRefreshTime} cameraId: {camera.CameraID} currentTime: {currentTimeSecs} refreshRateSecs: {refreshRateSecs}");
 
@@ -64,6 +65,7 @@ public class TimedHostedService : IHostedService
                 //List empty. Need not fire API ... return 
                 return;
             }
+            UpdateLastFetchedTimestamps(allCamerasDB);
             // Serialize the list of cameras into a JSON string
             var values = new Dictionary<string, string> {
                 { "request_data", JsonConvert.SerializeObject(allCamerasAPI) }
@@ -77,7 +79,6 @@ public class TimedHostedService : IHostedService
                 Console.WriteLine($"API response: {jsonString}");
                 //TODO: Add await 
                 SaveCountDataFromApiResponse(jsonString);
-                UpdateLastFetchedTimestamps(allCamerasDB);
             }else {
                 var errorText = await response.Content.ReadAsStringAsync();
                 Console.WriteLine($"API Error: {response.StatusCode} - {errorText}");
