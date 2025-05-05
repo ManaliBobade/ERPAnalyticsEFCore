@@ -123,22 +123,7 @@
         <p><strong>Total In Count:</strong> <span id="countLabel1"></span></p>
         <p><strong>Total Out Count:</strong> <span id="countLabel2"></span></p>
         <p><strong></strong> <span id="tempLabel"></span></p>
-
-        <!-- New Schedule Rectangle placed below Total Out Count -->
-        <div class="form-group" style="border: 1px solid #ccc; padding: 15px; border-radius: 5px; margin-top: 20px; width: 50%;">
-            <label for="scheduleName">Schedule Name:</label>
-            <input type="text" id="scheduleName" placeholder="Enter schedule name" class="form-control" />
-
-            <label for="duration">Duration (seconds):</label>
-            <input type="number" id="duration" min="1" placeholder="Duration in seconds" class="form-control" oninput="validateDuration(event)" />
-
-            <label for="startTime">Start Time (24hr format):</label>
-            <input type="time" id="startTime" class="form-control" step="1" /> <!-- Input for time -->
-
-            <div style="margin-top: 10px;">
-                <button onclick="addSchedule()" style="padding: 8px 15px; font-size: 14px;">Add Schedule</button>
-            </div>
-        </div>
+		<p><a href="/Schedule">Go to Add Schedule Page</a></p>
     </div>
 
     <!-- Hidden inputs to store total counts -->
