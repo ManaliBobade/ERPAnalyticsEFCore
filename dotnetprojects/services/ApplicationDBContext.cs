@@ -15,6 +15,7 @@ public class ApplicationDBContext : DbContext {
 
     public DbSet<Camera> Cameras { get; set; }
     public DbSet<CountData> CountData { get; set; }
+    public DbSet<Schedule> Schedules { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder) {
         base.OnModelCreating(modelBuilder);

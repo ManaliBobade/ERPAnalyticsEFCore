@@ -31,6 +31,8 @@ builder.Services.AddHttpClient(); // Register HttpClient for dependency injectio
 builder.Services.AddHostedService<TimedHostedService>();
 builder.Services.AddScoped<CameraService>();
 builder.Services.AddScoped<CountDataService>();
+builder.Services.AddScoped<ScheduleService>();
+
 
 var app = builder.Build();
 

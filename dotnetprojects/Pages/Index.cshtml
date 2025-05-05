@@ -4,6 +4,11 @@
     ViewData["Title"] = "Home page";
 }
 
+<!-- Hidden form to generate the anti-forgery token -->
+<form method="post">
+    @Html.AntiForgeryToken()
+</form>
+
 <!DOCTYPE html>
 <html>
   <!DOCTYPE html>
@@ -80,30 +85,190 @@
 	  </style>
   </head>
 
-	<script type="text/javascript">
+  @using System.Text.Json
+  	@{
+    	var camerasJson = JsonSerializer.Serialize(Model.Cameras);
+	}
+
+<body>
+
+    <div class="form-container">
+        <div class="form-group">
+            <label for="Test_DatetimeLocal">Date:</label>
+            <input type="date" id="Test_DatetimeLocal">
+        </div>
+
+        <div class="form-group">
+            <label for="cameraname">Camera Name:</label>
+            <select name="cameraname" id="cameraname" multiple class="form-control">
+                @foreach (var camera in Model.Cameras) {
+                    <option value="@camera.CameraID">@camera.CameraName</option> 
+                }
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="mealtype">Schedule:</label>
+            <select name="mealtype" id="mealtype" class="form-control">
+                <option value="">-- Select a schedule --</option> <!-- Optional placeholder -->
+            </select>
+        </div>
+        
+        <div id="showbutton" style="display: flex; align-items: center; height: 100%; margin-bottom: 15px;">
+            <button onclick="showPplCount()" style="padding: 8px 15px; font-size: 14px;">Get Count</button>
+        </div>
+    </div>
+
+    <div class="results">
+        <p><strong>Total In Count:</strong> <span id="countLabel1"></span></p>
+        <p><strong>Total Out Count:</strong> <span id="countLabel2"></span></p>
+        <p><strong></strong> <span id="tempLabel"></span></p>
+
+        <!-- New Schedule Rectangle placed below Total Out Count -->
+        <div class="form-group" style="border: 1px solid #ccc; padding: 15px; border-radius: 5px; margin-top: 20px; width: 50%;">
+            <label for="scheduleName">Schedule Name:</label>
+            <input type="text" id="scheduleName" placeholder="Enter schedule name" class="form-control" />
+
+            <label for="duration">Duration (seconds):</label>
+            <input type="number" id="duration" min="1" placeholder="Duration in seconds" class="form-control" oninput="validateDuration(event)" />
+
+            <label for="startTime">Start Time (24hr format):</label>
+            <input type="time" id="startTime" class="form-control" step="1" /> <!-- Input for time -->
+
+            <div style="margin-top: 10px;">
+                <button onclick="addSchedule()" style="padding: 8px 15px; font-size: 14px;">Add Schedule</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hidden inputs to store total counts -->
+    <input type="hidden" id="totalIn" value="@Model.TotalIn" />
+    <input type="hidden" id="totalOut" value="@Model.TotalOut" />
+
+</body>
+</html>
+
+<script>
+	document.getElementById('cameraname').addEventListener('change', function () {
+		const selectedOptions = Array.from(this.selectedOptions);
+		const selectedCameraIDs = selectedOptions.map(option => option.value);
+		console.log("Selected Camera IDs:", selectedCameraIDs);
+
+		fetch(`/Index?handler=GetSchedules&cameraId=${selectedCameraIDs[0]}`)
+		.then(response => response.json())
+		.then(data => {
+			const mealTypeSelect = document.getElementById('mealtype');
+            mealTypeSelect.innerHTML = ''; 
+			data.forEach(schedule => {
+                const option = document.createElement('option');
+                option.value = schedule.scheduleID; 
+                option.textContent = schedule.scheduleName;
+                mealTypeSelect.appendChild(option);
+            });
+		})
+		.catch(error => {
+			console.error("Error fetching people count:", error);
+		});
+
+	});
+</script>
+
+<script type="text/javascript">
+
+	function addSchedule() {
+
+		var scheduleName = document.getElementById('scheduleName').value;
+    	var timeValue = document.getElementById('startTime').value;
+        var duration = parseInt(document.getElementById('duration').value, 10); // Convert duration to integer
+
+        if (!scheduleName || !startTime || isNaN(duration)) {
+            alert('Please fill in all fields with valid values!');
+            return; // Stop the function if any field is empty or duration is not a number
+        }
+
+		// Split time into components
+    	var [hours, minutes, seconds] = timeValue.split(':');
+    	seconds = seconds || '00';
+
+		var today = new Date();
+		var localTime = new Date(
+			today.getFullYear(),
+			today.getMonth(),
+			today.getDate(),
+			parseInt(hours),
+			parseInt(minutes),
+			parseInt(seconds)
+		);
+
+		const pad = (n) => n.toString().padStart(2, '0');
+    	var formattedLocalDate = `${localTime.getFullYear()}-${pad(localTime.getMonth() + 1)}-${pad(localTime.getDate())}T${pad(localTime.getHours())}:${pad(localTime.getMinutes())}:${pad(localTime.getSeconds())}`;
+
+		const scheduleData = {
+			cameraID: 9,
+			scheduleName: scheduleName,
+			@* startTime: new Date().toISOString(), // ISO 8601 format is important *@
+			startTime: formattedLocalDate,
+			durationInSec: duration
+		};
+
+		fetch('?handler=AddSchedue', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+				'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+			},
+			body: JSON.stringify(scheduleData)
+		})
+		.then(response => response.json())
+		.then(data => {
+			alert("Added Schedule: " + data.count);
+		})
+		.catch(error => console.error('Error:', error));
+	}
+
 	function showPplCount() {
+		var schedule = document.getElementById('mealtype');
+		var selectedScheduleID = schedule.value;
+
+		fetch(`/Index?handler=GetScheduleByID&scheduleID=${selectedScheduleID}`)
+		.then(response => {
+    		if (!response.ok) {
+      			throw new Error(`Server returned ${response.status}: ${response.statusText}`);
+   			 }
+    		return response.json();
+  		})
+		.then(data => {
+			if (Array.isArray(data) && data.length > 0) {
+				var selectedSchedule;
+				data.forEach(schedule => {
+					selectedSchedule = schedule;
+				}); 
+				showPplCount1(selectedSchedule); 
+			} 
+		})
+		.catch(error => {
+			console.error('Fetch error:', error);
+		});
+	}
+
+	function showPplCount1(selectedSchedule1) {
 
 		const selectedOptions = Array.from(document.getElementById("cameraname").selectedOptions);
         const selectedIds = selectedOptions.map(opt => opt.value);
 
-		var schedule = document.getElementById('mealtype');
-		var selectedSchedule = schedule.value;
+		var scheduleStartTime = selectedSchedule1.startTime; 
+		var scheduleDuration = selectedSchedule1.durationInSec;
+
 		var inputDateString = document.getElementById('Test_DatetimeLocal').value;
 		var selectedDate1 = new Date(inputDateString);
-		var selectedDate2 = new Date(inputDateString);
 
-		if (selectedSchedule == "breakfast") {
-			selectedDate1.setHours(8, 0, 0, 0);
-			selectedDate2.setHours(9, 30, 0, 0);
-		}
-		if (selectedSchedule == "lunch") {
-			selectedDate1.setHours(12, 30, 0, 0);
-			selectedDate2.setHours(14, 0, 0, 0);
-		}
-		if (selectedSchedule == "dinner") {
-			selectedDate1.setHours(20, 0, 0, 0);
-			selectedDate2.setHours(21, 30, 0, 0);
-		}
+		var timeOnly = new Date(scheduleStartTime); // scheduleStartTime is like "1900-01-01T12:30:00"
+		var hours = timeOnly.getHours();
+		var minutes = timeOnly.getMinutes();
+		selectedDate1.setHours(hours);
+		selectedDate1.setMinutes(minutes);
+		var selectedDate2 = new Date(selectedDate1.getTime());
+		selectedDate2.setSeconds(selectedDate2.getSeconds() + scheduleDuration);
 
 		var t1 = Math.round(selectedDate1.getTime() / 1000);
 		var t2 = Math.round(selectedDate2.getTime() / 1000);  
@@ -122,50 +287,6 @@
 			console.error("Error fetching people count:", error);
 		});
 	}
-	</script>
-
-<body>
-
-    <div class="form-container">
-        <div class="form-group">
-            <label for="Test_DatetimeLocal">Date:</label>
-            <input type="date" id="Test_DatetimeLocal">
-        </div>
-
-        <div class="form-group">
-            <label for="cameraname">Camera Name:</label>
-            <select name="cameraname" id="cameraname" multiple class="form-control">
-            @foreach (var camera in Model.Cameras) {
-                <option value="@camera.CameraID">@camera.CameraName</option> 
-            }
-        </select>
-        </div>
-
-        <div class="form-group">
-            <label for="mealtype">Schedule:</label>
-            <select name="mealtype" id="mealtype">
-                <option value="breakfast">Breakfast</option>
-                <option value="lunch">Lunch</option>
-                <option value="dinner">Dinner</option>
-            </select>
-        </div>
-        
-        <div id="showbutton" style="display: flex; align-items: center; height: 100%;">
-            <button onclick="showPplCount()" style="padding: 8px 15px; font-size: 14px;">Get Count</button>
-        </div>
-    </div>
-
-    <div class="results">
-        <p><strong>Total In Count:</strong> <span id="countLabel1"></span></p>
-        <p><strong>Total Out Count:</strong> <span id="countLabel2"></span></p>
-		<p><strong></strong> <span id="tempLabel"></span></p>
-    </div>
-
-	<!-- Hidden inputs to store total counts -->
-	<input type="hidden" id="totalIn" value="@Model.TotalIn" />
-	<input type="hidden" id="totalOut" value="@Model.TotalOut" />
-
-</body>
-</html>
+</script>
 
 

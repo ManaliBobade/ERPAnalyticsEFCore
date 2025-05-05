@@ -16,21 +16,24 @@ public class CountDataService
 
     public async Task SaveCountDataAsync(IEnumerable<CountData> countDataList)
     {
-        // Assuming you have a CountData table in your DB context
+        foreach (var item in countDataList) {
+            item.DateOnly = item.Date;
+            item.TimeOnly = item.Time;
+        }
         await _context.CountData.AddRangeAsync(countDataList);
         await _context.SaveChangesAsync();
     }
 
     public async Task<CountTotals> GetCountTotalsFilteredAsync(
     List<int> cameraIDs, long fromTime, long toTime) {
-        var fromTimeNew = 1744103930;
-        var toTimeNew = 1744357711;
 
+        Console.WriteLine($"GetCount Timestamps: {fromTime} {toTime} CameraIds: {string.Join(", ", cameraIDs)}");
+    
         var totals = await _context.CountData
         .Where(cd =>
             cameraIDs.Contains(cd.CameraId) &&
-            cd.StartTime >= fromTimeNew &&
-            cd.EndTime <= toTimeNew)
+            cd.StartTime >= fromTime &&
+            cd.EndTime <= toTime)
         .GroupBy(_ => 1)
         .Select(g => new CountTotals
         {
@@ -38,7 +41,6 @@ public class CountDataService
             TotalOut = g.Sum(cd => cd.Out)
         })
         .FirstOrDefaultAsync();
-        Console.WriteLine($"Totals: {totals.TotalOut} {totals.TotalIn}");
         return totals ?? new CountTotals(); // Return 0s if no match
     }
     
