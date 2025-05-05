@@ -24,6 +24,34 @@ public class CountDataService
         await _context.SaveChangesAsync();
     }
 
+    // public List<CountData> GetCountDataByDateAndCamera(DateTime date, int cameraId)
+    // {
+    //     return _context.CountData
+    //         .Where(cd => cd.DateOnly.Date == date.Date && cd.CameraId == cameraId)
+    //         .OrderByDescending(cd => cd.TimeOnly) // Sorting by TimeOnly
+    //         .ToList();
+    // }
+
+ public List<CountData> GetCountDataByDateAndCamera(DateTime date, int cameraId)
+{
+    // Ensure that the provided 'date' is in local time
+    var localDate = new DateTime(date.Year, date.Month, date.Day, 0, 0, 0, DateTimeKind.Local);
+    
+    // Convert to UTC
+    var startOfDay = localDate.ToUniversalTime();
+    var endOfDay = startOfDay.AddDays(1);
+
+    // Convert the DateTime values to Unix timestamps (UTC)
+    long startTimestamp = ((DateTimeOffset)startOfDay).ToUnixTimeSeconds();
+    long endTimestamp = ((DateTimeOffset)endOfDay).ToUnixTimeSeconds();
+
+    // Query the database using StartTime in Unix timestamps and CameraId
+    return _context.CountData
+        .AsNoTracking() // Improves performance for read-only queries
+        .Where(cd => cd.CameraId == cameraId && cd.StartTime >= startTimestamp && cd.StartTime < endTimestamp)
+        .ToList();
+}
+
     public async Task<CountTotals> GetCountTotalsFilteredAsync(
     List<int> cameraIDs, long fromTime, long toTime) {
 
