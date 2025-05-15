@@ -133,6 +133,23 @@
     <input type="hidden" id="totalIn" value="@Model.TotalIn" />
     <input type="hidden" id="totalOut" value="@Model.TotalOut" />
 
+	<script>
+		// Auto-trigger every 30 seconds
+		setInterval(() => {
+			console.log("Auto-refresh triggered at", new Date().toLocaleTimeString());
+			// Ensure inputs are valid before auto-calling
+			const scheduleID = document.getElementById('mealtype').value;
+			const cameraSelect = document.getElementById('cameraname');
+			const dateValue = document.getElementById('Test_DatetimeLocal').value;
+
+			const selectedCameras = Array.from(cameraSelect.selectedOptions);
+			const hasValidInputs = scheduleID && selectedCameras.length > 0 && dateValue;
+
+			if (hasValidInputs) {
+				showPplCount();
+			}
+		}, 10000); // 3 seconds
+	</script>
 </body>
 </html>
 
@@ -277,5 +294,7 @@
 		});
 	}
 </script>
+
+
 
 
