@@ -14,8 +14,10 @@ public class IndexModel(CameraService cameraService, CountDataService countDataS
 
     public int TotalIn { get; set; }
     public int TotalOut { get; set; }
+    public int TotalPresent { get; set; }
 
-    public async Task OnGetAsync() {
+    public async Task OnGetAsync()
+    {
         // Synchronous call for camera list (if you need to populate it for UI)
         Cameras = _cameraService.GetCameras();
     }
@@ -35,13 +37,17 @@ public class IndexModel(CameraService cameraService, CountDataService countDataS
     public async Task<JsonResult> OnGetGetPeopleCountAsync([FromQuery] List<int> cameraIds,
         [FromQuery] long from,
         [FromQuery] long to) {
-
+        int totalPresent = 0;
         (int totalIn, int totalOut) = await _countDataService.GetCountTotalsFilteredAsync(cameraIds, from, to);
+        totalPresent = totalIn - totalOut;
         TotalIn = totalIn;
         TotalOut = totalOut;
-        return new JsonResult(new {
+        TotalPresent = totalIn - totalOut;
+        return new JsonResult(new
+        {
             totalIn,
-            totalOut
+            totalOut,
+            totalPresent
         });
     }
 
